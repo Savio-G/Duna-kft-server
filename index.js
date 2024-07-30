@@ -75,7 +75,6 @@ async function run() {
     // get individual shifts and all the shifts
 
     app.get('/shifts', async (req, res) => {
-      console.log(req.query.email)
       let query = {}
       if (req.query?.email) {
         query = { email: req.query.email }
@@ -84,6 +83,30 @@ async function run() {
       res.send(result)
     })
 
+    app.put('/shifts/:id', async (req, res) => {
+      const id = req.params.id
+      const user = req.body
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: false }
+      const updateDoc = {
+        $set: {
+          name: user.name,
+          hours: user.hours,
+          label: user.label,
+          email: user.email,
+          position: user.position,
+          time: user.time
+        },
+      };
+      const result = await shiftsCollection.updateOne(filter, updateDoc, options)
+      res.send(result)
+    })
+    app.delete('/shifts/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await shiftsCollection.deleteOne(query)
+      res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
